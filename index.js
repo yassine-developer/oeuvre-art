@@ -52,6 +52,39 @@ document.querySelector("button#submit").addEventListener('click', (e)=>{
     oeuvres.push(oeuvre);
     // console.log(oeuvre.afficher());
     afficherListe();
-
+    
 })
 
+// Fonction pour rechercher une œuvre d'art en utilisant l'API de l'Art Institute of Chicago
+async function chercherImageOeuvre(titre) {
+    const url = `https://api.artic.edu/api/v1/artworks/search?q=${titre}`;
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Vérifier si des œuvres ont été trouvées
+        if (data.data && data.data.length > 0) {
+            // Récupérer le premier résultat
+            const oeuvre = data.data[0];
+            const imageUrl = `https://www.artic.edu/iiif/2/${oeuvre.image_id}/full/843,/0/default.jpg`;
+
+            return imageUrl;
+        } else {
+            throw new Error('Aucune œuvre trouvée.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de la recherche de l\'image :', error);
+    }
+}
+
+// Exemple d'utilisation
+chercherImageOeuvre('Starry Night').then(imageUrl => {
+    if (imageUrl) {
+        console.log('Image trouvée :', imageUrl);
+        // Vous pouvez ensuite utiliser cette URL pour afficher l'image dans votre galerie
+        const imageElement = document.createElement('img');
+        imageElement.src = imageUrl;
+        document.body.appendChild(imageElement);
+    }
+});
