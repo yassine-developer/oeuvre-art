@@ -32,7 +32,7 @@ class OeuvreArt {
         this.prix = prix;
     }
     afficher() {
-        return `L'œuvre intitulée "${this.titre}" a été créée par l'artiste ${this.artiste} en ${this.annee}, et appartient au genre ${this.genre}. Son prix est estimé à ${this.prix}€`;
+        return `L'œuvre intitulée \n  "${this.titre}" \n a été créée par l'artiste ${this.artiste} en ${this.annee}, et appartient au genre ${this.genre}. Son prix est estimé à ${this.prix}€`;
     }
 
     comparer(target) {
@@ -88,6 +88,13 @@ function afficherListe() {
             div.appendChild(img);
         }
 
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.classList.add('comparer-checkbox');
+        checkbox.dataset.index = oeuvres.indexOf(oeuvre); // stocke l'index de l'œuvre
+
+        div.prepend(checkbox);
+
         galerie.appendChild(div);
     });
 }
@@ -121,8 +128,23 @@ document.querySelector("button#submit").addEventListener('click', async (e) => {
     document.querySelectorAll("form input").forEach(input => input.value = "");
 });
 
+document.querySelector("#comparer-btn").addEventListener("click", () => {
+    const checkboxes = document.querySelectorAll(".comparer-checkbox:checked");
+    const resultEl = document.querySelector("#resultat-comparaison");
+
+    if (checkboxes.length !== 2) {
+        resultEl.textContent = "❌ Veuillez sélectionner exactement deux œuvres.";
+        return;
+    }
+
+    const indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
+    const [oeuvre1, oeuvre2] = [oeuvres[indices[0]], oeuvres[indices[1]]];
+    const comparaison = oeuvre1.comparer(oeuvre2);
+    resultEl.textContent = `✅ Résultat: ${ comparaison }`;
+});
+
 // "Seated Woman", "Alberto Giacometti", 1950, "Sculpture", 5700000
-// "Bust of a Woman", "Auguste Rodin", 1885, "Sculpture", 
+// "Bust of a Woman", "Auguste Rodin", 1885, "Sculpture",
 // Head of a Woman", "Pablo Picasso", 1909, "Sculpture", 4800000
 // Standing Figure", "Alberto Giacometti", 1947, "Sculpture", 6000000
 // "American Gothic", "Grant Wood", 1930, "Peinture", 5000000

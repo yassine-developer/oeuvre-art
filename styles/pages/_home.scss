@@ -4,6 +4,7 @@
     text-align: center;
     background-color: #bac3cb;
     border-radius: 10px 10px 0 0;
+    white-space: pre-line;
     img{
         display: block;
     }
@@ -19,7 +20,7 @@ form{
     justify-content: center;
     margin-bottom: 20px;
 }
-select{}
+
 
 input{
     flex-basis: 50%;
