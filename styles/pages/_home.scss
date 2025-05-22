@@ -1,0 +1,40 @@
+.carte-oeuvre{
+    margin-top: 20px;
+    width:  200px;
+    text-align: center;
+    background-color: #bac3cb;
+    border-radius: 10px 10px 0 0;
+    img{
+        display: block;
+    }
+}
+h1{
+    text-align: center;
+}
+form{
+    display: flex;
+    flex-wrap: wrap;
+    width: 400px;
+    margin-inline: auto;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+input{
+    flex-basis: 50%;
+}
+
+#submit{
+    margin-top: 10px;
+}
+
+label{
+    flex-basis: 50%;
+}
+
+#galerie{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    place-items: center;
+    background-color: beige;
+}

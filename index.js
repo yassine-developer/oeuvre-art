@@ -1,90 +1,120 @@
+async function fetchImageFromArtInstitute(titre) {
+    try {
+        const url = `https://api.artic.edu/api/v1/artworks/search?q=${encodeURIComponent(titre)}&fields=id,title,image_id,artist_display`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!data.data.length) return null;
+
+        const artwork = data.data.find(item =>
+            item.title.toLowerCase().includes(titre.toLowerCase())
+        );
+
+        if (artwork && artwork.image_id) {
+            const imageUrl = `https://www.artic.edu/iiif/2/${artwork.image_id}/full/843,/0/default.jpg`;
+            return imageUrl;
+        }
+
+        return null;
+    } catch (err) {
+        console.error("Erreur :", err);
+        return null;
+    }
+}
+
 const oeuvres = [];
-class OeuvreArt{
-    constructor(titre,artiste,annee,genre,prix){
+class OeuvreArt {
+    constructor(titre, artiste, annee, genre, prix) {
         this.titre = titre;
         this.artiste = artiste;
         this.annee = annee;
         this.genre = genre;
         this.prix = prix;
     }
-    afficher(){
+    afficher() {
         return `L'œuvre intitulée "${this.titre}" a été créée par l'artiste ${this.artiste} en ${this.annee}, et appartient au genre ${this.genre}. Son prix est estimé à ${this.prix}€`;
     }
 
-    comparer(target){
-        if(this.prix > target.prix){
+    comparer(target) {
+        if (this.prix > target.prix) {
             return `${this.titre}  est plus chere que ${target.titre}`;
-        }else if( this.prix == target.prix){
+        } else if (this.prix == target.prix) {
             return `${this.titre}  a la meme valeur que ${target.titre}`;
-        }else{
+        } else {
             return `${target.titre}  est plus chere que ${this.titre}`;
         }
     }
 
-    modifier(titre,artiste,annee,genre,prix){
-        if(titre) this.titre = titre;
-        if(artiste) this.artiste = artiste;
-        if(annee) this.annee = annee;
-        if(genre) this.genre = genre;
-        if(prix) this.prix = prix;
+    modifier(titre, artiste, annee, genre, prix) {
+        if (titre) this.titre = titre;
+        if (artiste) this.artiste = artiste;
+        if (annee) this.annee = annee;
+        if (genre) this.genre = genre;
+        if (prix) this.prix = prix;
     }
 }
 
-function afficherListe(){
+function afficherListe() {
     const galerie = document.querySelector("#galerie");
     galerie.innerHTML = "";
     oeuvres.forEach(oeuvre => {
-        const p =document.createElement('p');
-        p.textContent = ` ${oeuvre.afficher()}`;
-        galerie.append(p);
-    })
+        const div = document.createElement('div');
+        div.classList.add('carte-oeuvre');
+
+        const p = document.createElement('p');
+        p.textContent = oeuvre.afficher();
+
+        div.appendChild(p);
+
+        // 🎨 Ajout : afficher image si dispo
+        if (oeuvre.image) {
+            const img = document.createElement('img');
+            img.src = oeuvre.image;
+            img.alt = oeuvre.titre;
+            img.style.maxWidth = "200px";
+            div.appendChild(img);
+        }
+
+        galerie.appendChild(div);
+    });
 }
 
-document.querySelector("button#submit").addEventListener('click', (e)=>{
+
+document.querySelector("button#submit").addEventListener('click', async (e) => {
     e.preventDefault();
+
     const titre = document.querySelector("#titre").value;
     const artiste = document.querySelector("#artiste").value;
     const annee = document.querySelector("#annee").value;
     const genre = document.querySelector("#genre").value;
     const prix = document.querySelector("#prix").value;
-    
+
     const oeuvre = new OeuvreArt(titre, artiste, annee, genre, prix);
-    oeuvres.push(oeuvre);
-    // console.log(oeuvre.afficher());
-    afficherListe();
-    
-})
 
-// Fonction pour rechercher une œuvre d'art en utilisant l'API de l'Art Institute of Chicago
-async function chercherImageOeuvre(titre) {
-    const url = `https://api.artic.edu/api/v1/artworks/search?q=${titre}`;
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        // Vérifier si des œuvres ont été trouvées
-        if (data.data && data.data.length > 0) {
-            // Récupérer le premier résultat
-            const oeuvre = data.data[0];
-            const imageUrl = `https://www.artic.edu/iiif/2/${oeuvre.image_id}/full/843,/0/default.jpg`;
-
-            return imageUrl;
-        } else {
-            throw new Error('Aucune œuvre trouvée.');
-        }
-    } catch (error) {
-        console.error('Erreur lors de la recherche de l\'image :', error);
-    }
-}
-
-// Exemple d'utilisation
-chercherImageOeuvre('Starry Night').then(imageUrl => {
+    // Récupération de l'image correspondant au titre et artiste
+    const imageUrl = await fetchImageFromArtInstitute(titre);
     if (imageUrl) {
-        console.log('Image trouvée :', imageUrl);
-        // Vous pouvez ensuite utiliser cette URL pour afficher l'image dans votre galerie
-        const imageElement = document.createElement('img');
-        imageElement.src = imageUrl;
-        document.body.appendChild(imageElement);
+        oeuvre.image = imageUrl;
+    } else {
+        oeuvre.image = null; // ou une image par défaut si tu veux
+        console.log("Image non trouvée.");
     }
+
+    oeuvres.push(oeuvre);
+    afficherListe();
+    document.querySelectorAll("form input").forEach(input => input.value = "");
 });
+
+// "Seated Woman", "Alberto Giacometti", 1950, "Sculpture", 5700000
+// "Bust of a Woman", "Auguste Rodin", 1885, "Sculpture", 
+// Head of a Woman", "Pablo Picasso", 1909, "Sculpture", 4800000
+// Standing Figure", "Alberto Giacometti", 1947, "Sculpture", 6000000
+// "American Gothic", "Grant Wood", 1930, "Peinture", 5000000
+// "Nighthawks", "Edward Hopper", 1942, "Peinture", 7000000
+// "Self-Portrait", "Vincent van Gogh", 1887, "Peinture", 8000000
+// "Water Lilies", "Claude Monet", 1916, "Peinture", 7500000
+// The Old Guitarist", "Pablo Picasso", 1903, "Peinture", 9000000
+// "The Bathers", "Paul Cézanne", 1898, "Peinture", 6000000
+// "The Dance", "Henri Matisse", 1910, "sculture", 6800000
+// "The Pianist", "Henri Matisse", 1917, "Peinture", 4500000
+// "Madonna and Child", "Duccio di Buoninsegna", 1300, "sculture", 2500000
