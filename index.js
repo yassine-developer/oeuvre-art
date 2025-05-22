@@ -54,10 +54,23 @@ class OeuvreArt {
     }
 }
 
+// Function to filter oeuvres based on genre
+function filterOeuvresByGenre(genre) {
+    if (genre === "tout") {
+        return oeuvres; // No filter applied, show all oeuvres
+    }
+    return oeuvres.filter(oeuvre => oeuvre.genre.toLowerCase() === genre.toLowerCase());
+}
+
+// Function to update the displayed list of oeuvres based on filter
 function afficherListe() {
+    const genreFilter = document.querySelector("#genreFilter").value; // Get selected genre filter
+    const filteredOeuvres = filterOeuvresByGenre(genreFilter); // Filter the oeuvres
+
     const galerie = document.querySelector("#galerie");
     galerie.innerHTML = "";
-    oeuvres.forEach(oeuvre => {
+
+    filteredOeuvres.forEach(oeuvre => {
         const div = document.createElement('div');
         div.classList.add('carte-oeuvre');
 
@@ -78,6 +91,9 @@ function afficherListe() {
         galerie.appendChild(div);
     });
 }
+
+// Event listener for filter change
+document.querySelector("#genreFilter").addEventListener("change", afficherListe);
 
 
 document.querySelector("button#submit").addEventListener('click', async (e) => {
